@@ -46,6 +46,7 @@ export const google = async (req, res, next) => {
         .json(rest);
     } else {
       // if there is no user, we first generate a hashed password, 
+      // 36 means numbers from 0-9 and letters from A-z
       const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
@@ -56,8 +57,9 @@ export const google = async (req, res, next) => {
        Math.random().toString(36).slice(-4)` is generating a unique username for a new user based on
        their name. Here's a breakdown of what each part is doing: */
         username:
-        // olaide1191 not Olaide 1191
+        // olaide1191 not Olaide 1191, then we join again and make them lowercase
           req.body.name.split(' ').join('').toLowerCase() +
+          // 36 means numbers from 0-9 and letters from A-z
           Math.random().toString(36).slice(-4),
         email: req.body.email,
         password: hashedPassword,
@@ -66,6 +68,7 @@ export const google = async (req, res, next) => {
       await newUser.save();
       // we authenticate the new user
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      // separating the response from other response
       const { password: pass, ...rest } = newUser._doc;
       res
         .cookie('access_token', token, { httpOnly: true })
